@@ -1,24 +1,18 @@
-# README
+# Flights-service
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
 
-Things you may want to cover:
+## Run project 
 
-* Ruby version
+* First clone repo from github<br/>
+    `git clone git@github.com:a1ICk/flights-service.git`
+* In terminal enter directory `cd ./flights-service`
+* Run `bundle install` to install missing gems
+* To setup database run `bin/rails db:create db:migrate`
+* Run server with `bin/rails server` or `bin/rails s`
 
-* System dependencies
 
-* Configuration
+## Tasks
 
-* Database creation
-
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+#### To parse data and write in database run `rails batch:parse_data`
+#### To write in CSV file run `rails barch:write_csv`
+> **flight_numbers.csv** located in root project folder
