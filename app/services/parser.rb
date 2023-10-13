@@ -4,68 +4,104 @@ require 'uri'
 require 'json'
 
 class Service::Parser
-  attr_accessor :airline_flights
-
-  def initialize
-    @airline_flights = []
+  attr_accessor :flight_iata, :flight_icao
+  def initialize(flight_iata: '', flight_icao: '')
+    @flight_iata = flight_iata
+    @flight_icao = flight_icao
   end
 
-  def parse_airline(airline_icao_code)
-    uri = URI("https://flight-data4.p.rapidapi.com/get_airline_flights?airline=#{airline_icao_code}")
+  def find_flight
+    flight = Flight.includes(:routes).find_by(flight_number: @flight_iata) || Flight.includes(:routes).find_by(flight_number: @flight_icao)
 
-    data = JSON.parse(Service::Parser.response(uri).read_body)
+    return flight unless flight.nil?
 
-    data.each do |i|
-      return unless i.is_a? Hash
-      @airline_flights << i['flight']
+    if (@flight_iata + @flight_icao).empty?
+      throw Exception.new 'Both flight_iata and flight_icao can not be empty'
     end
 
-    p 'Success parse airlines'
+    url = ''
+    if @flight_icao.empty?
+      url = "https://airlabs.co/api/v9/flight?flight_iata=#{@flight_iata}&api_key=#{ENV['AIRLABS_API_KEY']}"
+    else
+      url = "https://airlabs.co/api/v9/flight?flight_icao=#{@flight_icao}&api_key=#{ENV['AIRLABS_API_KEY']}"
+    end
+
+    response_data = Service::Parser.response(url)['response']
+    if response_data&.empty? || response_data.nil?
+      return nil
+    end
+
+    arrival_airport_iata = response_data['arr_iata']
+    departure_airport_iata = response_data['dep_iata']
+
+    if @flight_icao.empty?
+      flight = Flight.create!(flight_number: @flight_iata, distance: 0)
+    else
+      flight = Flight.create!(flight_number: @flight_icao, distance: 0)
+    end
+
+    departure = Service::Parser.find_airport_by_iata(departure_airport_iata)
+    arrival = Service::Parser.find_airport_by_iata(arrival_airport_iata)
+
+    distance = Service::Parser.calculate_distance(departure.latitude, departure.longitude, arrival.latitude, arrival.longitude)
+
+    Route.create!(
+      distance: distance,
+      departure_airport_id: departure.id,
+      arrival_airport_id: arrival.id,
+      flight_id: flight.id
+    )
+
+    flight
   end
 
-  def parse_flight
-    if @airline_flights.empty?
-      throw Exception.new 'Empty flights array'
-    end
-    error_count = 0
 
-    @airline_flights.each do |flight|
-      sleep(2)
-      begin
-        uri = URI("https://flight-data4.p.rapidapi.com/get_flight_info?flight=#{flight}")
+  private
 
-        response = JSON.parse(Service::Parser.response(uri).read_body)[flight]
+  def self.find_airport_by_iata(airport_iata)
+    url = "https://airlabs.co/api/v9/airports?iata_code=#{airport_iata}&api_key=#{ENV['AIRLABS_API_KEY']}"
 
-        arr_airport = response['arr_airport']
-        dep_airport = response['dep_airport']
+    data = Service::Parser.response(url)['response'][0]
 
-        distance = response['flight']['distance']
-        correct_flight = Service::CorrectFlight.correct_flight_number(flight)
-        new_flight = Flight.create(flight_number: correct_flight, distance: 0)
-
-        arrival = Airport.create!(longitude: arr_airport['longitude'], latitude: arr_airport['latitude'], city: arr_airport['city'], iata: arr_airport['iata'], country: arr_airport['country'])
-        departure = Airport.create!(longitude: dep_airport['longitude'], latitude: dep_airport['latitude'], city: dep_airport['city'], iata: dep_airport['iata'], country: dep_airport['country'])
-
-        Route.create!(distance: distance, arrival_airport_id: arrival.id, departure_airport_id: departure.id, flight_id: new_flight.id)
-      rescue Exception => ex
-        error_count += 1
-        p "#{ex.message}\n#{ex.cause}"
-      ensure
-        next
-      end
-    end
-
-    p "Count errors while parsing flights: #{error_count}"
+    Airport.create!(
+      iata: data['iata_code'],
+      city: data['city'],
+      country: data['country_code'],
+      latitude: data['lat'],
+      longitude: data['lng']
+    )
   end
 
-  def self.response(uri)
+  def self.calculate_distance(dep_lat, dep_lon, arr_lat, arr_lon)
+    earth_radius = 6371
+
+    lat1_rad = self.to_rad(dep_lat)
+    lon1_rad = self.to_rad(dep_lon)
+    lat2_rad = self.to_rad(arr_lat)
+    lon2_rad = self.to_rad(arr_lon)
+
+    dlat = lat2_rad - lat1_rad
+    dlon = lon2_rad - lon1_rad
+
+    a = Math.sin(dlat/2)**2 + Math.cos(lat1_rad) * Math.cos(lat2_rad) * Math.sin(dlon/2)**2
+    c = 4 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+
+    (earth_radius * c).round(2)
+  end
+
+  def self.to_rad(degree)
+    (degree * (Math::PI/180)).round(2)
+  end
+
+  def self.response(url)
+    uri = URI(url)
     http = Net::HTTP.new(uri.host, uri.port)
     http.use_ssl = true
 
     request = Net::HTTP::Get.new(uri)
-    request["X-RapidAPI-Key"] = ENV['RAPID_API_KEY']
-    request["X-RapidAPI-Host"] = ENV['RAPID_API_HOST']
 
-    http.request(request)
+    response = http.request(request)
+
+    JSON.parse(response.read_body)
   end
 end

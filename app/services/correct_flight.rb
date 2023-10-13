@@ -2,31 +2,41 @@
 
 class Service::CorrectFlight
 
+  def self.flight_number_type(flight_number)
+    if flight_number.size == 7
+      return :icao
+    elsif flight_number.size < 7
+    return :iata
+    end
+
+    throw Exception.new 'Invalid flight number'
+  end
+
   def self.correct_flight_number(flight_number)
+
     flight_number = flight_number.to_s
     first_part = ''
-    if flight_number.size == 7
-      first_part = flight_number[0...3]
 
-      unless correct_carrier_icao_code(first_part)
-        return nil
-      end
-
-    elsif flight_number.size < 7
+    case flight_number_type(flight_number)
+    when :iata
       first_part = flight_number[0...2]
-
-
       unless correct_carrier_iata_code(first_part)
         return nil
       end
 
-    else
-      throw Exception.new "Invalid flight number"
+      postfix = flight_number[first_part.length...]
+
+      { flight_iata: first_part.concat(postfix.concat('0' * (4 - postfix.size))), flight_icao: '' }
+    when :icao
+      first_part = flight_number[0...3]
+      unless correct_carrier_icao_code(first_part)
+        return nil
+      end
+
+      postfix = flight_number[first_part.length...]
+
+      { flight_icao: first_part.concat(postfix.concat('0' * (4 - postfix.size))), flight_iata: '' }
     end
-
-    postfix = flight_number[first_part.length...]
-
-    first_part.concat(postfix.concat('0' * (4 - postfix.size)))
   end
 
   def self.correct_carrier_iata_code(code)

@@ -7,7 +7,7 @@ class FlightSerializer
     @status = options[:status]
   end
 
-  attributes :distance
+  attributes :distance, :flight_number
 
   has_many :routes do |object|
     Route.where(flights: object)

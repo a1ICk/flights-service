@@ -1,5 +1,9 @@
 # frozen_string_literal: true
 
+require_relative '../services/service'
+require_relative '../services/correct_flight'
+require_relative '../services/parser'
+
 class FlightsController < ApplicationController
   before_action :set_flight
 
@@ -20,5 +24,10 @@ class FlightsController < ApplicationController
 
   def set_flight
     @flight = Flight.includes(:routes).find_by(flight_number: params[:flight_number])
+    if @flight.nil?
+      flight_number = Service::CorrectFlight.correct_flight_number(params[:flight_number])
+
+      @flight = Service::Parser.new(flight_iata: flight_number[:flight_iata], flight_icao: flight_number[:flight_icao]).find_flight
+    end
   end
 end
