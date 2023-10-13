@@ -1,7 +1,7 @@
 # Flights-service
 
 
-## Run project 
+## Run project
 
 * First clone repo from github<br/>
     `git clone git@github.com:a1ICk/flights-service.git`
@@ -13,6 +13,5 @@
 
 ## Tasks
 
-#### To parse data and write in database run `rails batch:parse_data`
 #### To write in CSV file run `rails barch:write_csv`
 > **flight_numbers.csv** located in root project folder
