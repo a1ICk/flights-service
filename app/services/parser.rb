@@ -50,7 +50,7 @@ class Service::Parser
       departure_airport_id: departure.id,
       arrival_airport_id: arrival.id,
       flight_id: flight.id
-    )
+    ).save!
 
     flight
   end
@@ -84,13 +84,13 @@ class Service::Parser
     dlon = lon2_rad - lon1_rad
 
     a = Math.sin(dlat/2)**2 + Math.cos(lat1_rad) * Math.cos(lat2_rad) * Math.sin(dlon/2)**2
-    c = 4 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+    c = Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
 
     (earth_radius * c).round(2)
   end
 
   def self.to_rad(degree)
-    (degree * (Math::PI/180)).round(2)
+    degree * (Math::PI/180)
   end
 
   def self.response(url)

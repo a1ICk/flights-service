@@ -17,7 +17,7 @@ RSpec.describe FlightsController do
       end
     end
     context 'when incorrect request' do
-      before { get :show, params: { flight_number: 'NA0000' } }
+      before { get :show, params: { flight_number: 'LO4' } }
 
       it 'returns a 200' do
         expect(response).to have_http_status(:not_found)

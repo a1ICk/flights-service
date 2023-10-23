@@ -11,13 +11,13 @@ RSpec.describe Service::CorrectFlight do
     end
 
     context 'when icao' do
-      let(:flight_number) { described_class.flight_number_type('XXZZZZ') }
+      let(:flight_number) { described_class.flight_number_type('XX1') }
 
       it { expect(flight_number).to eq(:iata) }
     end
 
     context 'throws exception' do
-      let(:flight_number) { described_class.flight_number_type('WWWWZZZZ') }
+      let(:flight_number) { described_class.flight_number_type('__WWZZZZ') }
 
       it { expect { flight_number }.to raise_exception Exception }
     end
@@ -66,29 +66,29 @@ RSpec.describe Service::CorrectFlight do
   describe "#correct_flight_number" do
     context 'when iata' do
       context 'when correct number' do
-        let(:flight_number) { described_class.correct_flight_number('XX000') }
+        let(:flight_number) { described_class.correct_flight_number('XX001') }
 
-        it { expect(flight_number).to eq({ flight_iata: 'XX0000', flight_icao: '' }) }
+        it { expect(flight_number).to eq({ flight_iata: 'XX0001', flight_icao: '' }) }
       end
 
       context 'when incorrect number' do
-        let(:flight_number) { described_class.correct_flight_number('X_0000') }
+        let(:flight_number) { described_class.correct_flight_number('X_0010') }
 
-        it { expect(flight_number).to be_nil }
+        it { expect { flight_number }.to raise_exception Exception }
       end
     end
 
     context 'when icao' do
       context 'when correct number' do
-        let(:flight_number) { described_class.correct_flight_number('XXX0000') }
+        let(:flight_number) { described_class.correct_flight_number('XXX235') }
 
-        it { expect(flight_number).to eq({ flight_icao: 'XXX0000', flight_iata: '' }) }
+        it { expect(flight_number).to eq({ flight_icao: 'XXX0235', flight_iata: '' }) }
       end
 
       context 'when incorrect number' do
-        let(:flight_number) { described_class.correct_flight_number('Y_Y0000') }
+        let(:flight_number) { described_class.correct_flight_number('Y_Y1') }
 
-        it { expect(flight_number).to be_nil }
+        it { expect { flight_number }.to raise_exception Exception }
       end
     end
 

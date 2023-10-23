@@ -61,4 +61,12 @@ group :development, :test do
 
   # Code coverage for Ruby with a powerful configuration library and automatic merging of coverage across test suites
   gem 'simplecov', '~> 0.22.0'
+
+  # WebMock allows stubbing HTTP requests and setting expectations on HTTP requests.
+  gem 'webmock', '~> 3.19', '>= 3.19.1'
+end
+
+group :test do
+  # Record your test suite's HTTP interactions and replay them during future test runs for fast, deterministic, accurate tests
+  gem 'vcr', '~> 6.2'
 end

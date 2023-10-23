@@ -1,0 +1,70 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: https://airlabs.co/api/v9/flight?api_key=e2d12414-7879-4eac-b4fc-3cce7fb5c855&flight_iata=LO4
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+      User-Agent:
+      - Ruby
+      Host:
+      - airlabs.co
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Date:
+      - Wed, 18 Oct 2023 08:12:57 GMT
+      Content-Type:
+      - application/json; charset=utf-8
+      Transfer-Encoding:
+      - chunked
+      Connection:
+      - keep-alive
+      X-Powered-By:
+      - PHP/3.0.14
+      Access-Control-Allow-Origin:
+      - "*"
+      Access-Control-Allow-Methods:
+      - DELETE, POST, GET, OPTIONS
+      Access-Control-Allow-Headers:
+      - Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With
+      Etag:
+      - W/"a06-A33GC0fLF9AOLXq7w750v5S0iVw"
+      X-Frame-Options:
+      - SAMEORIGIN
+      Cf-Cache-Status:
+      - DYNAMIC
+      Report-To:
+      - '{"endpoints":[{"url":"https:\/\/a.nel.cloudflare.com\/report\/v3?s=fc5udJFVsLdazdemjc3lhEO1KTRZqsq3ITKSc0JVwmRdOGYqaCtqAVihYKOS7t7G1aoZFUglaALQMHDfcV4PFL2n8QrfagiqrTm5G0J1lN%2FqqP3sJx7pkr6QuzU%3D"}],"group":"cf-nel","max_age":604800}'
+      Nel:
+      - '{"success_fraction":0,"report_to":"cf-nel","max_age":604800}'
+      Server:
+      - cloudflare
+      Cf-Ray:
+      - 817f51b8096c3491-WAW
+    body:
+      encoding: ASCII-8BIT
+      string: '{"request":{"lang":"en","currency":"USD","time":13,"id":"ike1xdnj91c","server":"l","host":"airlabs.co","pid":2500536,"key":{"id":27605,"api_key":"e2d12414-7879-4eac-b4fc-3cce7fb5c855","type":"free","expired":"2023-11-17T00:00:00.000Z","registered":"2023-10-18T08:11:26.000Z","limits_by_hour":2500,"limits_by_minute":250,"limits_by_month":1000,"limits_total":1000},"params":{"flight_iata":"LO4","lang":"en"},"version":9,"method":"flight","client":{"ip":"151.249.153.108","geo":{"country_code":"BY","country":"Belarus","continent":"Europe","city":"Gomel","lat":52.4319,"lng":30.9731,"timezone":"Europe/Minsk"},"connection":{"type":"cable/dsl","isp_code":42036,"isp_name":"Gomelsky
+        RTSC Garant JSC"},"device":{},"agent":{},"karma":{"is_blocked":false,"is_crawler":false,"is_bot":false,"is_friend":false,"is_regular":true}}},"response":{"aircraft_icao":"B788","age":8,"built":2013,"engine":"jet","engine_count":"2","model":"Boeing
+        787-8 pax","manufacturer":"BOEING","msn":"37894","type":"landplane","reg_number":"SP-LRB","airline_iata":"LO","airline_icao":"LOT","flight_iata":"LO4","flight_icao":"LOT4N","flight_number":"4N","dep_iata":"ORD","dep_icao":"KORD","dep_terminal":"5","dep_gate":null,"dep_time":"2023-10-17
+        21:45","dep_estimated":"2023-10-17 21:22","dep_actual":"2023-10-17 21:22","dep_time_utc":"2023-10-18
+        02:45","dep_estimated_utc":"2023-10-18 02:22","dep_actual_utc":"2023-10-18
+        02:22","dep_time_ts":1697597100,"dep_estimated_ts":1697595720,"dep_actual_ts":1697595720,"arr_iata":"WAW","arr_icao":"EPWA","arr_terminal":null,"arr_gate":null,"arr_baggage":null,"arr_time":"2023-10-18
+        13:50","arr_estimated":"2023-10-18 12:53","arr_actual":null,"arr_time_utc":"2023-10-18
+        11:50","arr_estimated_utc":"2023-10-18 10:53","arr_actual_utc":null,"arr_time_ts":1697629800,"arr_estimated_ts":1697626380,"cs_airline_iata":null,"cs_flight_number":null,"cs_flight_iata":null,"status":"en-route","duration":545,"delayed":null,"dep_delayed":null,"arr_delayed":null,"updated":1697616749,"hex":"48AE01","flag":"PL","lat":61.845253,"lng":-22.2288,"alt":12496,"dir":80,"speed":940,"v_speed":-0.3,"squawk":"2235","dep_name":"Chicago
+        O''Hare International Airport","dep_city":"Chicago","dep_country":"US","arr_name":"Warsaw
+        Chopin Airport","arr_city":"Warsaw","arr_country":"PL","airline_name":"LOT
+        - Polish Airlines","percent":71,"utc":"2023-10-18 08:12","eta":160},"terms":"Unauthorized
+        access is prohibited and punishable by law. \nReselling data ''As Is'' without
+        AirLabs.Co permission is strictly prohibited. \nFull terms on https://airlabs.co/.
+        \nContact us info@airlabs.co"}'
+  recorded_at: Wed, 18 Oct 2023 08:12:57 GMT
+recorded_with: VCR 6.2.0

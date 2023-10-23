@@ -20,13 +20,13 @@ RSpec.describe Service::CSVWriter do
       let(:arrival_airport) { create(:airport) }
       let(:route) { create(:route, arrival_airport: arrival_airport, departure_airport: departure_airport) }
       let(:flight) { create(:flight, routes: [route]) }
-      let(:line) { described_class.write_line(csv, flight, flight.flight_number) }
+      let(:line) { described_class.write_line(csv, flight, flight.flight_number, flight.flight_number) }
 
       it { expect(line).to be_truthy }
     end
 
     context "when flight is nil" do
-      let(:line) { described_class.write_line(csv, nil, 'XXZZZZ') }
+      let(:line) { described_class.write_line(csv, nil, 'XXZZZZ', 'XXZZZZ') }
 
       it { expect(line).to be_falsey }
     end
@@ -34,7 +34,7 @@ RSpec.describe Service::CSVWriter do
 
   describe '::write' do
     context "when correct path" do
-      let(:writer) { described_class.write('flight_numbers.csv') }
+      let(:writer) { described_class.write('flight_numbers_test.csv') }
 
       it { expect(writer).to be_truthy }
     end

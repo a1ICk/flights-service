@@ -3,10 +3,11 @@
 class Service::CorrectFlight
 
   def self.flight_number_type(flight_number)
-    if flight_number.size == 7
+    code = flight_number[0...3]
+    if correct_carrier_icao_code(code)
       return :icao
-    elsif flight_number.size < 7
-    return :iata
+    elsif correct_carrier_iata_code(code[0...2])
+      return :iata
     end
 
     throw Exception.new 'Invalid flight number'
@@ -20,22 +21,16 @@ class Service::CorrectFlight
     case flight_number_type(flight_number)
     when :iata
       first_part = flight_number[0...2]
-      unless correct_carrier_iata_code(first_part)
-        return nil
-      end
 
       postfix = flight_number[first_part.length...]
 
-      { flight_iata: first_part.concat(postfix.concat('0' * (4 - postfix.size))), flight_icao: '' }
+      { flight_iata: first_part.concat(('0'*(4-postfix.size)).concat(postfix)), flight_icao: '' }
     when :icao
       first_part = flight_number[0...3]
-      unless correct_carrier_icao_code(first_part)
-        return nil
-      end
 
       postfix = flight_number[first_part.length...]
 
-      { flight_icao: first_part.concat(postfix.concat('0' * (4 - postfix.size))), flight_iata: '' }
+      { flight_icao: first_part.concat(('0'*(4-postfix.size)).concat(postfix)), flight_iata: '' }
     end
   end
 
@@ -56,7 +51,7 @@ class Service::CorrectFlight
       raise Exception.new 'Invalid icao code'
     end
 
-    if code =~ /[\dA-Z]{3}/
+    if code =~ /[A-Z]{3}/
       return true
     end
 

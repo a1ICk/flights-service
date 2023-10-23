@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 require 'csv'
-
+require 'pry'
 class Service::CSVWriter
 
-  def self.write_line(csv, flight, flight_number)
+  def self.write_line(csv, flight, flight_number, flight_number_to_lookup)
     if flight.nil?
-      csv << [flight_number, nil, 'FAIL', nil, nil, nil, nil]
+      csv << [flight_number, flight_number_to_lookup, 'FAIL', nil, nil, nil, nil]
       return false
     end
     csv << [
@@ -28,20 +28,26 @@ class Service::CSVWriter
       CSV.open(path, 'w', headers: true) do |csv|
         csv << headers
 
-        flights_list.each do |flight_number|
+        flights_list.each do |line|
 
-          begin
-            correct_flight_number = Service::CorrectFlight.correct_flight_number(flight_number)
-            flight = Service::Parser.new(flight_iata: correct_flight_number[:flight_iata], flight_icao: correct_flight_number[:flight_icao]).find_flight
+          flight_numbers = line.split(/[,;.\s]+/)
+          flight_numbers.each do |flight_number|
+            begin
+              correct_flight_number = Service::CorrectFlight.correct_flight_number(flight_number)
+              flight = Service::Parser.new(flight_iata: correct_flight_number[:flight_iata], flight_icao: correct_flight_number[:flight_icao]).find_flight
 
-            self.write_line(csv, flight, flight_number)
-          rescue Exception => ex
-            csv << [flight_number, nil, 'FAIL', nil, nil, nil, nil]
+              flight_number_for_lookup = correct_flight_number.map { |_, v| v unless v.empty? }.compact[0]
+              csv << [line, flight_number_for_lookup, 'FAIL', nil, nil, nil, nil] && next if flight.nil?
+
+              self.write_line(csv, flight, line, flight_number)
+
+            rescue Exception => ex
+              p ex, line
+            end
           end
         end
       end
     rescue Exception => ex
-      p ex
       return false
     end
 

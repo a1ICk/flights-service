@@ -41,19 +41,53 @@ RSpec.describe Service::Parser do
   describe '#to_rad' do
     let(:radians) { described_class.to_rad(30) }
 
-    it { expect(radians).to eq(0.52) }
+    it { expect(radians).to eq(0.5235987755982988) }
   end
 
   describe '#calculate_distance' do
-    let(:distance) { described_class.calculate_distance(43.412938, -80.4771472, 43.653226, -79.3831843) }
+    let(:distance) { described_class.calculate_distance(52.16575, 20.96712, 50.07617, 19.79157) }
 
-    it { expect(distance).to eq(92.36) }
+    it { expect(distance).to eq(123.2) }
   end
 
   describe '#response' do
-    let(:response) { described_class.response('https://jsonplaceholder.typicode.com/todos/1') }
+    context 'when parse airport' do
+      let(:response) {
+        VCR.use_cassette("parser/airport") {
+          described_class.response("https://airlabs.co/api/v9/airports?iata_code=CDG&api_key=#{ENV['AIRLABS_API_KEY']}")
+        }
+      }
 
-    it { expect(response).to be_instance_of Hash }
+      it 'shows airport by CDG IATA code' do
+        expect(response).to be_instance_of Hash
+        expect(response).to have_key('response')
+        expect(response).to have_key('request')
+        expect(response).to have_key('terms')
+      end
+
+      it 'has correct IATA airport code' do
+        expect(response['response'][0]['iata_code']).to eq('CDG')
+      end
+    end
+
+    context 'when parse flight' do
+      let(:response) {
+        VCR.use_cassette("parser/flight") {
+          described_class.response("https://airlabs.co/api/v9/flight?flight_iata=LO4&api_key=#{ENV['AIRLABS_API_KEY']}")
+        }
+      }
+
+      it 'shows flight by LO4 IATA code' do
+        expect(response).to be_instance_of Hash
+        expect(response).to have_key('response')
+        expect(response).to have_key('request')
+        expect(response).to have_key('terms')
+      end
+
+      it 'has correct IATA flight code' do
+        expect(response['response']['flight_iata']).to eq('LO4')
+      end
+    end
   end
 
   describe "#find_airport_by_iata" do
