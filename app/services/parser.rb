@@ -26,10 +26,12 @@ class Service::Parser
       url = "https://airlabs.co/api/v9/flight?flight_icao=#{@flight_icao}&api_key=#{ENV['AIRLABS_API_KEY']}"
     end
 
-    response_data = Service::Parser.response(url)['response']
-    if response_data&.empty? || response_data.nil?
+    response = Service::Parser.response(url)
+    if response&.empty? || response.nil?
       return nil
     end
+
+    response_data = response['response']
 
     arrival_airport_iata = response_data['arr_iata']
     departure_airport_iata = response_data['dep_iata']
@@ -52,7 +54,7 @@ class Service::Parser
       flight_id: flight.id
     ).save!
 
-    flight
+    flight.reload
   end
 
 
@@ -94,14 +96,28 @@ class Service::Parser
   end
 
   def self.response(url)
-    uri = URI(url)
-    http = Net::HTTP.new(uri.host, uri.port)
-    http.use_ssl = true
+    tries = 0
+    begin
+      uri = URI(url)
+      http = Net::HTTP.new(uri.host, uri.port)
+      http.use_ssl = true
 
-    request = Net::HTTP::Get.new(uri)
+      request = Net::HTTP::Get.new(uri)
 
-    response = http.request(request)
+      response = http.request(request)
 
-    JSON.parse(response.read_body)
+      if response.code != 200
+        tries += 1
+        raise Net::HTTPBadRequest.new 'not found'
+      end
+
+      JSON.parse(response.read_body)
+    rescue Errno::ECONNREFUSED, Net::ReadTimeout, Net::HTTPBadRequest => e
+      p e.message
+      sleep(1)
+      retry if tries < 2
+    ensure
+      return nil
+    end
   end
 end

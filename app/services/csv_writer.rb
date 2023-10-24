@@ -42,7 +42,8 @@ class Service::CSVWriter
               self.write_line(csv, flight, line, flight_number)
 
             rescue Exception => ex
-              p ex, line
+              p "at #{__FILE__}: #{__LINE__}\n#{line}"
+              puts ex.full_message
             end
           end
         end
